@@ -2,6 +2,8 @@
 ![alt text](image.png)
 Схема базы данных(после правок):
 ![alt text](image-1.png)
+Схема базы данных.3:
+![alt text](image-2.png)
 то же самое, только по ссылке: https://drive.google.com/file/d/1agFge1Z8YKuF5RD7OqwnQm0os24pGxoO/view?usp=sharing 
 
 
