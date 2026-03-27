@@ -99,4 +99,20 @@ exports.up = async (pgm) => {
     pgm.createindex('position', 'deleted_at', {
         name: 'idx_position_deleted_at',
     });
-}
+
+    pgm.createtrigger('organizations', 'update_organizations_updated_at', {
+        when: 'before',
+        operation: 'update',
+        function: 'update_updated_at_column',
+    });
+    pgm.createtrigger('departments', 'update_departments_updated_at', {
+        when: 'before',
+        operation: 'update',
+        function: 'update_updated_at_column',
+    });
+    pgm.createtrigger('position', 'update_position_updated_at', {
+        when: 'before',
+        operation: 'update',
+        function: 'update_updated_at_column',
+    });
+};
