@@ -83,4 +83,20 @@ exports.up = async (pgm) => {
             type: 'timestamp',
         },
     });
+
+    pgm.createindex('organizations', 'deleted_at', {
+        name: 'idx_organizations_deleted_at',
+    });
+    pgm.createindex('departments', 'organization_id', {
+        name: 'idx_departments_organization_id',
+    });
+    pgm.createindex('departments', 'parent_id', {
+        name: 'idx_departments_parent_id',
+    });
+    pgm.createindex('departments', 'deleted_at', {
+        name: 'idx_departments_deleted_at',
+    });
+    pgm.createindex('position', 'deleted_at', {
+        name: 'idx_position_deleted_at',
+    });
 }
