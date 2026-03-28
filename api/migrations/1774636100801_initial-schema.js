@@ -1,13 +1,13 @@
 exports.up = async (pgm) => {
-    pgm.createtable('organizations', {
+    pgm.createTable('organizations', {
         id:{
             type:'uuid',
-            primarykey: true,
+            primaryKey: true,
             default: pgm.func('gen_random_uuid()'),
         },
         name:{
-            type: 'uuid',
-            notnull: true,
+            type: 'varchar(255)',
+            notNull: true,
         },
         comment:{
             type: 'text',
@@ -25,10 +25,10 @@ exports.up = async (pgm) => {
         },
     });
 
-    pgm.createtable('departments', {
+    pgm.createTable('departments', {
         id:{
             type: 'uuid',
-            primarykey: true,
+            primaryKey: true,
             default: pgm.func('gen_random_uuid()'),
         },   
         organization_id:{
@@ -44,7 +44,7 @@ exports.up = async (pgm) => {
         },
         name:{
             type: 'varchar(255)',
-            notnull: true,
+            notNull: true,
         },
         comment:{
             type: 'text',
@@ -61,15 +61,15 @@ exports.up = async (pgm) => {
             type: 'timestamp',
         },     
     });
-    pgm.createtable('position', {
+    pgm.createTable('position', {
         id:{
             type: 'uuid',
-            primarykey: true,
+            primaryKey: true,
             default: pgm.func('gen_random_uuid()'),
         },
         name:{
             type: 'varchar(255)',
-            notnull: true,
+            notNull: true,
         },
         created_at:{
             type: 'timestamp',
@@ -84,33 +84,48 @@ exports.up = async (pgm) => {
         },
     });
 
-    pgm.createindex('organizations', 'deleted_at', {
+    pgm.createIndex('organizations', 'deleted_at', {
         name: 'idx_organizations_deleted_at',
     });
-    pgm.createindex('departments', 'organization_id', {
+    pgm.createIndex('departments', 'organization_id', {
         name: 'idx_departments_organization_id',
     });
-    pgm.createindex('departments', 'parent_id', {
+    pgm.createIndex('departments', 'parent_id', {
         name: 'idx_departments_parent_id',
     });
-    pgm.createindex('departments', 'deleted_at', {
+    pgm.createIndex('departments', 'deleted_at', {
         name: 'idx_departments_deleted_at',
     });
-    pgm.createindex('position', 'deleted_at', {
+    pgm.createIndex('position', 'deleted_at', {
         name: 'idx_position_deleted_at',
     });
 
-    pgm.createtrigger('organizations', 'update_organizations_updated_at', {
+    pgm.createFunction(
+        'update_updated_at_column',
+        [],
+        {
+            returns: 'trigger',
+            language: 'plpgsql',
+        },
+        `
+        BEGIN
+            NEW.updated_at = NOW();
+            RETURN NEW;
+        END;    
+        `
+    );
+
+    pgm.createTrigger('organizations', 'update_organizations_updated_at', {
         when: 'before',
         operation: 'update',
         function: 'update_updated_at_column',
     });
-    pgm.createtrigger('departments', 'update_departments_updated_at', {
+    pgm.createTrigger('departments', 'update_departments_updated_at', {
         when: 'before',
         operation: 'update',
         function: 'update_updated_at_column',
     });
-    pgm.createtrigger('position', 'update_position_updated_at', {
+    pgm.createTrigger('position', 'update_position_updated_at', {
         when: 'before',
         operation: 'update',
         function: 'update_updated_at_column',
