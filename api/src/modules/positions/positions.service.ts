@@ -5,7 +5,7 @@ export class PositionsService {
     async create(data: {name: string;}) {
         const query = `
             INSERT INTO positions(name)
-            VALUES ($1, $2)
+            VALUES ($1)
             RETURNING id, name, created_at, updated_at
         `;
         const result = await pool.query(query, [data.name]);

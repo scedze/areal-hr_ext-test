@@ -38,7 +38,7 @@ export class DepartmentsService {
             data.parent_id || null,
             data.comment || null,
         ]);
-        return result.rrows[0];
+        return result.rows[0];
     }
     async findAll() {
         const query = `
