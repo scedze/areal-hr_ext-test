@@ -105,5 +105,82 @@ export class DepartmentsService {
         }
         return result.rows[0];
     }
-    
+    async update(id: string, data: { name?: string; parent_id?: string | null; comment?: string | null}) {
+        const department = await this.findOne(id);
+        const updates: string[] = [];
+        const values: any[] = [];
+        let paramIndex = 1;
+        if (data.name !== undefined) {
+            updates.push(`name = $${paramIndex++}`);
+            values.push(data.name);
+        }
+        if (data.comment !== undefined) {
+            updates.push(`comment = $${paramIndex++}`);
+            values. push(data.comment);
+        }
+        if (data.parent_id !== undefined) {
+            if (data.parent_id === id) {
+                throw new BadRequestException('Department cannot be parent of itself');
+            }
+            if (data.parent_id) {
+                const parentCheck = await pool.query(
+                    'SELECT id, organization_id FROM departments WHERE id = $1 AND deleted_at IS NULL',
+                    [data.parent_id]
+                );
+                if (parentCheck.rows.lenfth === 0) {
+                    throw new BadRequestException('Parent department not found');
+                }
+                if (parentCheck.rows[0].organization_id !== department.organization_id) {
+                    throw new BadRequestException('Parent department must belong to the same organization');
+                }
+            }
+            updates.push(`parent_id = $${paramIndex++}`);
+            values.push(data.parent_id);
+        }
+        if(updates.length === 0) {
+            return this.findOne(id);
+        }
+        values.push(id);
+        const query = `
+            UPDATE departments
+            SET ${updates.join(', ')}
+            WHERE id = $${paramIndex} AND deleted_at IS NULL
+            RETURNING id, name, organization_id, parent_id, comment, created_at, updated_at
+        `;
+        const result = await pool.query(query, values);
+        return result.rows[0];
+    }
+    async remove(id: string) {
+        const childrenCheck = await pool.query(
+            'SELECT id FROM departments WHERE parent_id = $1 AND deleted_at IS NULL',
+            [id]
+        );
+        if (childrenCheck.rows.length > 0) {
+            throw new BadRequestException('Cannot delete department with children. Delete children first');
+        }
+        const query = `
+            UPDATE departments
+            SET deleted_at = NOW()
+            WHERE id = $1 AND deleted_at IS NULL
+            RETURNING id
+        `;
+        const result = await pool.query(query, [id]);
+        if (result.rows.length === 0) {
+            throw new NotFoundException(`department with Id ${id} not found`);
+        }
+        return { success: true, message: 'Department soft deleted'};
+    }
+    async restore(id: string) {
+        const query = `
+            UPDATE departments
+            SET deleted_at = NULL
+            WHERE id = $1
+            RETURNING id, name, organization_id, parent_id, comment, created_at, updated_at
+        `;
+        const result = await pool.query(query, [id]);
+        if (result. rows.length === 0) {
+            throw new NotFoundException(`Department with Id ${id} not found`);
+        }
+        return result.rows[0];
+    }
 }
