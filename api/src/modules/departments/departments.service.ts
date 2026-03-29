@@ -32,7 +32,7 @@ export class DepartmentsService {
             VALUES ($1, $2, $3, $4)
             RETURNING id, name, organization_id, parent_id, comment, created_at, updated_at
         `;
-        const result = await pool.query(queryObjects, [
+        const result = await pool.query(query, [
             data.name,
             data.organization_id,
             data.parent_id || null,
@@ -67,7 +67,7 @@ export class DepartmentsService {
         departments.forEach((dept) => {
             map.set(dept.id, { ...dept, children: [] });
         });
-        departments/forEachChild((dept) => {
+        departments.forEach((dept) => {
             const node = map.get(dept.id);
             if (dept.parent_id && map.has(dept.parent_id)) {
                 const parent = map.get(dept.parent_id);
