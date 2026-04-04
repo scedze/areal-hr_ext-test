@@ -135,3 +135,19 @@ exports.up = async (pgm) => {
         level: 'ROW',
     });
 };
+exports.down = async (pgm) => {
+    pgm.dropTrigger('organizations', 'update_organizations_updated_at');
+    pgm.dropTrigger('departments', 'update_departments_updated_at');
+    pgm.dropTrigger('positions', 'update_positions_updated_at');
+    pgm.dropFunction('update_updated_at_column');
+    
+    pgm.dropIndex('organizations', 'deleted_at', {name: 'idx_organizations_deleted_at'});
+    pgm.dropIndex('departments', 'organization_id', {name: 'idx_departments_organization_id'});
+    pgm.dropIndex('departments', 'parent_id', {name: 'idx_departments_parent_id'});
+    pgm.dropIndex('departments', 'deleted_at', {name: 'idx_departments_deleted_at'});
+    pgm.dropIndex('positions', 'deleted_at', {name: 'idx_positions_deleted_at'});
+    
+    pgm.dropTable('positions');
+    pgm.dropTable('departments');
+    pgm.dropTable('organizations');
+};

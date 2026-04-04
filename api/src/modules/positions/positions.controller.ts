@@ -1,27 +1,39 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus} from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { PositionsService } from './positions.service';
+import { CreatePositionDto } from './dto/create-position.dto';
+import { UpdateDepartmentDto } from '../departments/dto/update-department.dto';
 @Controller('positions')
 export class PositionsController {
-    constructor(private readonly positionsService: PositionsService) {}
-    @Post()
-    async create(@Body() body: {name: string}) {
-        return this.positionsService.create(body);
-    }
-    @Get()
-    async findAll() {
-        return this.positionsService.findAll();
-    }
-    @Get(':id')
-    async findOne(@Param('id') id: string) {
-        return this.positionsService.findOne(id);
-    }
-    @Put(':id')
-    async update(@Param('id') id: string, @Body() body: {name?: string}) {
-        return this.positionsService.update(id, body);
-    }
-    @Delete(':id')
-    @HttpCode(HttpStatus.NO_CONTENT)
-    async remove(@Param('id') id: string) {
-        return this.positionsService.remove(id);
-    }
+  constructor(private readonly positionsService: PositionsService) {}
+  @Post()
+  async create(@Body() createDto: CreatePositionDto) {
+    return this.positionsService.create(createDto);
+  }
+  @Get()
+  async findAll() {
+    return this.positionsService.findAll();
+  }
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.positionsService.findOne(id);
+  }
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updateDto: UpdateDepartmentDto) {
+    return this.positionsService.update(id, updateDto);
+  }
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id') id: string) {
+    await this.positionsService.remove(id);
+  }
 }
