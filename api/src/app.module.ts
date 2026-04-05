@@ -5,9 +5,10 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { PositionsModule } from './modules/positions/positions.module';
 import { EmployeesModule } from './modules/employees/employees.module';
+import { FilesModule } from './modules/files/files.module';
 
 @Module({
-  imports: [OrganizationsModule, DepartmentsModule, PositionsModule, EmployeesModule],
+  imports: [OrganizationsModule, DepartmentsModule, PositionsModule, EmployeesModule, FilesModule],
   controllers: [],
   providers: [],
 })
