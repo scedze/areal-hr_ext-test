@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
-import { PersonnelOperationsService } from './personnel-operations.service';
-import { CreatePersonnelOperationDto } from './dto/create-personnel-operation.dto';
-import { UpdatePersonnelOperationDto } from './dto/update-personnel-operation.dto';
+import { PersonnelOperationsService } from './personnel_operations.service';
+import { CreatePersonnelOperationDto } from './dto/create-personnel_operation.dto';
+import { UpdatePersonnelOperationDto } from './dto/update-personnel_operation.dto';
 
 @Controller('personnel-operations')
 export class PersonnelOperationsController {
