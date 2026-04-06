@@ -6,9 +6,10 @@ import { DepartmentsModule } from './modules/departments/departments.module';
 import { PositionsModule } from './modules/positions/positions.module';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { FilesModule } from './modules/files/files.module';
+import { PersonnelOperationsModule } from './modules/personnel_operations/personnel_operations.module';
 
 @Module({
-  imports: [OrganizationsModule, DepartmentsModule, PositionsModule, EmployeesModule, FilesModule],
+  imports: [OrganizationsModule, DepartmentsModule, PositionsModule, EmployeesModule, FilesModule, PersonnelOperationsModule],
   controllers: [],
   providers: [],
 })
