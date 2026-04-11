@@ -62,12 +62,20 @@ export class EmployeesService {
   async update(id: string, updateDto: UpdateEmployeeDto) {
     await this.findOne(id);
 
+    const allowedFields = [
+      'last_name', 'first_name', 'middle_name', 'birth_date',
+      'passport_series', 'passport_number', 'passport_issue_date',
+      'passport_department_code', 'passport_issued_by',
+      'registration_region', 'registration_locality', 'registration_street',
+      'registration_house', 'registration_building', 'registration_apartment'
+    ];
+
     const fields: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
 
     for (const [key, value] of Object.entries(updateDto)) {
-      if (value !== undefined) {
+      if (value !== undefined && allowedFields.includes(key)) {
         fields.push(`${key} = $${paramIndex++}`);
         values.push(value);
       }

@@ -103,12 +103,17 @@ export class PersonnelOperationsService {
   async update(id: string, updateDto: UpdatePersonnelOperationDto) {
     await this.findOne(id);
 
+    const allowedFields = [
+      'employee_id', 'operation_type', 'department_id',
+      'position_id', 'salary', 'operation_date'
+    ];
+
     const fields: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
 
     for (const [key, value] of Object.entries(updateDto)) {
-      if (value !== undefined) {
+      if (value !== undefined && allowedFields.includes(key)) {
         fields.push(`${key} = $${paramIndex++}`);
         values.push(value);
       }

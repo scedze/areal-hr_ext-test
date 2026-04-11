@@ -34,17 +34,21 @@ export class OrganizationsService {
     return result.rows[0];
   }
   async update(id: string, data: { name?: string; comment?: string | null }) {
+    
+    const allowedFields = [
+      'name', 'comment'
+    ];
+    
     const updates: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
-    if (data.name !== undefined) {
-      updates.push(`name = $${paramIndex++}`);
-      values.push(data.name);
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined && allowedFields.includes(key)) {
+        updates.push(`${key} = $${paramIndex++}`);
+        values.push(value);
+      }
     }
-    if (data.comment !== undefined) {
-      updates.push(`comment = $${paramIndex++}`);
-      values.push(data.comment);
-    }
+    
     if (updates.length === 0) {
       return this.findOne(id);
     }

@@ -11,7 +11,7 @@ export class CreateEmployeeDto {
     first_name: string;
 
     @IsOptional()
-    @IsDateString()
+    @IsString()
     @MaxLength(100)
     middle_name?: string;
 

@@ -6,7 +6,7 @@ import { UpdateFileDto } from './dto/update-file.dto';
 @Injectable()
 export class FilesService {
   async create(createDto: CreateFileDto) {
-    // Проверяем, существует ли сотрудник
+
     const employeeCheck = await pool.query(
       'SELECT id FROM employees WHERE id = $1 AND deleted_at IS NULL',
       [createDto.employee_id]
@@ -63,12 +63,16 @@ export class FilesService {
   async update(id: string, updateDto: UpdateFileDto) {
     await this.findOne(id);
 
+    const allowedFields = [
+      'name', 'file_path', 'employee_id'
+    ];
+
     const fields: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
 
     for (const [key, value] of Object.entries(updateDto)) {
-      if (value !== undefined) {
+      if (value !== undefined && allowedFields.includes(key)) {
         fields.push(`${key} = $${paramIndex++}`);
         values.push(value);
       }
