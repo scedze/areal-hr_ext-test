@@ -7,4 +7,5 @@ export const pool = new Pool({
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || '0000',
   database: process.env.DB_NAME || 'ext-test',
+  options: '-c client_encoding=utf8'
 });
