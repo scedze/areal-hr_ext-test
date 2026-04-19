@@ -8,12 +8,12 @@ export class EmployeesService {
   async create(createDto: CreateEmployeeDto) {
     const query = `
       INSERT INTO employees (
-        last_name, first_name, middle_name, birth_date,
+        last_name, first_name, middle_name, birth_date, phone
         passport_series, passport_number, passport_issue_date,
         passport_department_code, passport_issued_by,
         registration_region, registration_locality, registration_street,
         registration_house, registration_building, registration_apartment
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING *
     `;
     const values = [
@@ -21,6 +21,7 @@ export class EmployeesService {
       createDto.first_name,
       createDto.middle_name || null,
       createDto.birth_date || null,
+      createDto.phone || null,
       createDto.passport_series || null,
       createDto.passport_number || null,
       createDto.passport_issue_date || null,
@@ -63,7 +64,7 @@ export class EmployeesService {
     await this.findOne(id);
 
     const allowedFields = [
-      'last_name', 'first_name', 'middle_name', 'birth_date',
+      'last_name', 'first_name', 'middle_name', 'birth_date', 'phone',
       'passport_series', 'passport_number', 'passport_issue_date',
       'passport_department_code', 'passport_issued_by',
       'registration_region', 'registration_locality', 'registration_street',
