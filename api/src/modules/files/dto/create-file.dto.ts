@@ -1,4 +1,4 @@
-import { IsString, IsUUID, IsNotEmpty } from 'class-validator';
+import { IsString, IsUUID, IsNotEmpty, IsOptional, IsInt, Min } from 'class-validator';
 
 export class CreateFileDto {
   @IsString()
@@ -12,5 +12,14 @@ export class CreateFileDto {
   @IsUUID()
   @IsNotEmpty()
   employee_id: string;
+
+  @IsOptional()
+  @IsString()
+  mime_type?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  size_bytes?: number;
 
 }
