@@ -151,7 +151,7 @@ export class DepartmentsService {
     values.push(id);
     const query = `
             UPDATE departments
-            SET ${updates.join(', ')}
+            SET ${updates.join(', ')}, updated_at = NOW()
             WHERE id = $${paramIndex} AND deleted_at IS NULL
             RETURNING id, name, organization_id, parent_id, comment, created_at, updated_at
         `;

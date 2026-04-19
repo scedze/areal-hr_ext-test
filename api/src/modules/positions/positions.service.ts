@@ -39,7 +39,7 @@ export class PositionsService {
     }
     const query = `
             UPDATE positions
-            SET name = $1
+            SET name = $1, updated_at = NOW()
             WHERE id = $2 AND deleted_at IS NULL
             RETURNING id, name, created_at, updated_at
         `;

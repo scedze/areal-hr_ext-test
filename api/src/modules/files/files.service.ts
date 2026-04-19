@@ -85,7 +85,7 @@ export class FilesService {
     values.push(id);
     const query = `
       UPDATE files
-      SET ${fields.join(', ')}
+      SET ${fields.join(', ')}, updated_at = NOW()
       WHERE id = $${paramIndex} AND deleted_at IS NULL
       RETURNING *
     `;
