@@ -8,9 +8,11 @@ import { EmployeesModule } from './modules/employees/employees.module';
 import { FilesModule } from './modules/files/files.module';
 import { PersonnelOperationsModule } from './modules/personnel_operations/personnel_operations.module';
 import { OperationHistoryModule } from './modules/operation_history/operation_history.module';
+import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
-  imports: [OrganizationsModule, DepartmentsModule, PositionsModule, EmployeesModule, FilesModule, PersonnelOperationsModule, OperationHistoryModule],
+  imports: [OrganizationsModule, DepartmentsModule, PositionsModule, EmployeesModule, FilesModule, PersonnelOperationsModule, OperationHistoryModule, UsersModule, AuthModule],
   controllers: [],
   providers: [],
 })
