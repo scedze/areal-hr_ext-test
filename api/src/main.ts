@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import session from 'express-session';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -10,6 +11,15 @@ async function bootstrap() {
     origin: true,
     credentials: true,
   });
+
+  app.use(
+    session({
+      secret: '0000',
+      resave: false,
+      cookie: {httpOnly: true, maxAge: 24 * 60 * 60 * 1000},
+    }),
+  );
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
