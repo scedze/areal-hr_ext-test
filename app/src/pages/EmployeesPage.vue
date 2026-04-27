@@ -58,16 +58,16 @@
               <label>Дата рождения</label>
               <input type="date" v-model="form.birth_date" class="input" />
             </div>
-            <input v-model="form.phone" placeholder="Телефон" class="input"/>
+            <input v-model="form.phone" v-mask="'+7 (900) 000 00 00'" maxlength="12" @input="limitDigits" placeholder="Телефон" class="input"/>
           </div>
         </div>
         
         <div class="form-section">
           <h3>Паспортные данные</h3>
           <div class="form-row">
-            <input v-model="form.passport_series" placeholder="Серия" class="input" />
-            <input v-model="form.passport_number" placeholder="Номер" class="input" />
-            <input v-model="form.passport_department_code" placeholder="Код подр." class="input" />
+            <input v-model="form.passport_series" v-mask="'1234'" maxlength="4" @input="limitDigits" placeholder="Серия" class="input" />
+            <input v-model="form.passport_number" v-mask = "'123456'" maxlength="6" @input="limitDigits" placeholder="Номер" class="input" />
+            <input v-model="form.passport_department_code" v-mask = "'123456'" maxlength="6" @input="limitDigits" placeholder="Код подр." class="input" />
           </div>
           <div class="form-row">
             <div class="input-group">
