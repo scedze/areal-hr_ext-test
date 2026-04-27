@@ -2,20 +2,28 @@
   <div class="container">
     <div class="header">
       <h1>Сотрудники</h1>
-      <button @click="openCreateDialog" class="btn-add">
-        + Добавить сотрудника
-      </button>
+      <div class="header-actions">
+        <label class="checkbox-label">
+          <input type="checkbox" v-model="includeDismissed" @change="loadEmployees"/>
+          Показывать уволенных
+        </label>
+        <button @click="openCreateDialog" class="btn-add">
+          + Добавить сотрудника
+        </button>
+      </div>
     </div>
 
     <div v-if="loading" class="loading">Загрузка...</div>
 
     <div v-else-if="employees.length > 0" class="employees-list">
-      <div v-for="emp in employees" :key="emp.id" class="employee-card">
+      <div v-for="emp in employees" :key="emp.id" class="employee-card" :class="{dismissed : emp.is_dismissed}">
         <div class="employee-info">
           <div class="employee-name">
             {{ emp.last_name }} {{ emp.first_name }} {{ emp.middle_name || '' }}
+            <span v-if="emp.is_dismissed" class="dismissed-badge">Уволен</span>
           </div>
           <div class="employee-details">
+            <span v-if="emp.phone">Тел {{emp.phone }}</span>
             <span v-if="emp.birth_date">ДР {{ formatDate(emp.birth_date) }}</span>
             <span v-if="emp.passport_series && emp.passport_number">
               Паспорт {{ emp.passport_series }} {{ emp.passport_number }}
@@ -23,8 +31,9 @@
           </div>
         </div>
         <div class="employee-actions">
-          <button @click="openEditDialog(emp)" class="btn-edit">Изм.</button>
-          <button @click="confirmDelete(emp)" class="btn-delete">Удл.</button>
+          <button @click="openEditDialog(emp)" class="btn-edit">Изменить</button>
+          <button v-if="!emp.is_dismissed" @click="confirmDelete(emp)" class="btn-delete">Удалить</button>
+          <button v-if="emp.is_dismissed" @click="confirmRestore(emp)" class="btn-restore">Восстановить</button>
         </div>
       </div>
     </div>
@@ -49,6 +58,7 @@
               <label>Дата рождения</label>
               <input type="date" v-model="form.birth_date" class="input" />
             </div>
+            <input v-model="form.phone" placeholder="Телефон" class="input"/>
           </div>
         </div>
         
@@ -100,9 +110,10 @@ const employees = ref([]);
 const dialogVisible = ref(false);
 const isEdit = ref(false);
 const editingId = ref(null);
+const includeDismissed = ref(false);
 
 const initialForm = {
-  last_name: '', first_name: '', middle_name: '', birth_date: '',
+  last_name: '', first_name: '', middle_name: '', birth_date: '', phone: '',
   passport_series: '', passport_number: '', passport_issue_date: '',
   passport_department_code: '', passport_issued_by: '',
   registration_region: '', registration_locality: '', registration_street: '',
@@ -119,7 +130,15 @@ const formatDate = (date) => {
 const loadEmployees = async () => {
   loading.value = true;
   try {
-    const response = await employeesApi.getAll();
+    let url = '/employees';
+    const params = new URLSearchParams();
+    if (includeDismissed.value){
+      params.append('includeDismissed', 'true');
+    }
+    if (params.toString()){
+      url += '?' + params.toString();
+    }
+    const response = await employeesApi.getAll(url);
     employees.value = response.data;
   } catch (error) {
     console.error('Ошибка:', error);
@@ -147,40 +166,39 @@ const openEditDialog = (emp) => {
 };
 
 const save = async () => {
-  console.log('Сохраняем:', form.value);
-  
   if (!form.value.last_name || !form.value.first_name) {
     alert('Фамилия и имя обязательны');
     return;
   }
 
   try {
-    let response;
     if (isEdit.value) {
-      response = await employeesApi.update(editingId.value, form.value);
-      console.log('Обновлено:', response);
+      await employeesApi.update(editingId.value, form.value);
       alert('Сотрудник обновлен');
     } else {
-      response = await employeesApi.create(form.value);
-      console.log('Создано:', response);
+      await employeesApi.create(form.value);
       alert('Сотрудник создан');
     }
     dialogVisible.value = false;
     await loadEmployees();
   } catch (error) {
-    console.error('Ошибка сохранения:', error);
-    if (error.response) {
-      console.error('Детали ошибки:', error.response.data);
-      alert('Ошибка: ' + JSON.stringify(error.response.data));
-    } else {
-      alert('Ошибка сохранения');
-    }
+      const message = error.response?.data?.message || 'Ошибка сохранения';
+      alert(typeof message === 'string' ? message : JSON.stringify(message));
   }
 };
 
 const confirmDelete = (emp) => {
   if (confirm(`Удалить сотрудника ${emp.last_name}?`)) {
     employeesApi.delete(emp.id).then(() => loadEmployees());
+  }
+};
+
+const confirmRestore = (emp) => {
+  if (confirm(`Восстановить сотрудника ${emp.last_name}?`)){
+    employeesApi.restore(emp.id).then(() => {
+      alert('Сотрудник восстановлен');
+      loadEmployees();
+    });
   }
 };
 
@@ -374,4 +392,49 @@ h1 {
   color: #563c5c;
   font-weight: 600;
 }
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #563c5c;
+  cursor: pointer;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.employee-card.dismissed {
+  opacity: 0.7;
+  background-color: #f5f5f5;
+  border-color: #ccc;
+}
+
+.dismissed-badge {
+  background-color: #a64452;
+  color: white;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 10px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.btn-restore {
+  background-color: #a64452;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
 </style>

@@ -21,18 +21,18 @@ export class CreateEmployeeDto {
 
     @IsOptional()
     @IsString()
-    @MaxLength(12)
+    @Matches(/^(\+7|8)[0-9]{10}$/)
     phone?: string;
 
     @IsOptional()
     @IsString()
-    @Length(4, 4)
+    @Length(4)
     @Matches(/^[0-9]{4}$/)
     passport_series?: string;
 
     @IsOptional()
     @IsString()
-    @Length(6, 6)
+    @Length(6)
     @Matches(/^[0-9]{6}$/)
     passport_number?: string;
 

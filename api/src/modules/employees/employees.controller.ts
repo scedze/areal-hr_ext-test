@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
@@ -13,8 +13,13 @@ export class EmployeesController {
   }
 
   @Get()
-  async findAll() {
-    return this.employeesService.findAll();
+  async findAll(
+    @Query('departmentid') departmentId?: string,
+    @Query('positionId') positionId?: string,
+    @Query('search') search?: string,
+    @Query('includeDismissed') includeDismissed?: string,
+  ) {
+    return this.employeesService.findAll({departmentId, positionId, search, includeDismissed: includeDismissed === 'true',});
   }
 
   @Get(':id')
@@ -31,5 +36,11 @@ export class EmployeesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
     await this.employeesService.remove(id);
+  }
+
+  @Post(':id/restore')
+  @HttpCode(HttpStatus.OK)
+  async restore(@Param('id') id: string) {
+    return this.employeesService.restore(id);
   }
 }

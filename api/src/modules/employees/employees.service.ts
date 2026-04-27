@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { pool } from '../../database/pool';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
@@ -8,7 +8,7 @@ export class EmployeesService {
   async create(createDto: CreateEmployeeDto) {
     const query = `
       INSERT INTO employees (
-        last_name, first_name, middle_name, birth_date, phone
+        last_name, first_name, middle_name, birth_date, phone,
         passport_series, passport_number, passport_issue_date,
         passport_department_code, passport_issued_by,
         registration_region, registration_locality, registration_street,
@@ -38,13 +38,39 @@ export class EmployeesService {
     return result.rows[0];
   }
 
-  async findAll() {
-    const query = `
-      SELECT * FROM employees
-      WHERE deleted_at IS NULL
-      ORDER BY created_at DESC
+  async findAll(filters: { departmentId?: string; positionId?: string; search?: string; includeDismissed?: boolean }) {
+    let query = `
+      SELECT e.*,
+        d.name as department_name,
+        p.name as position_name,
+        o.name as organization_name,
+        CASE WHEN e.deleted_at IS NOT NULL THEN true ELSE false END as is_dismissed
+      FROM employees e
+      LEFT JOIN departments d ON d.id = e.department_id
+      LEFT JOIN positions p ON p.id = e.position_id
+      LEFT JOIN organizations o ON o.id = e.organization_id
+      WHERE 1=1
     `;
-    const result = await pool.query(query);
+    const values: any[] = [];
+    let paramIndex = 1;
+    if (!filters.includeDismissed) {
+      query += ` AND e.deleted_at IS NULL`;
+    }
+    if (filters.departmentId) {
+      query += ` AND e.department_id = $${paramIndex++}`;
+      values.push(filters.departmentId);
+    }
+    if (filters.positionId) {
+      query += ` AND e.position_id = $${paramIndex++}`;
+      values.push(filters.positionId);
+    }
+    if (filters.search) {
+      query += ` AND (e.last_name ILIKE $${paramIndex} OR e.first_name ILIKE $${paramIndex} OR e.middle_name ILIKE $${paramIndex})`;
+      values.push(`%${filters.search}%`, `%${filters.search}%`, `%${filters.search}%`);
+      paramIndex += 2;
+    }
+    query += ` ORDER BY e.created_at DESC`;
+    const result = await pool.query(query, values);
     return result.rows;
   }
 
@@ -98,6 +124,12 @@ export class EmployeesService {
   }
 
   async remove(id: string): Promise<void> {
+    const operationsCheck = await pool.query(
+      'SELECT id FROM personal_operations WHERE employee_id = $1', [id]
+    );
+    if (operationsCheck.rows.length > 0) {
+      throw new BadRequestException('Cannot delete employee with existing operations');
+    }
     const query = `
       UPDATE employees
       SET deleted_at = NOW()
@@ -107,5 +139,19 @@ export class EmployeesService {
     if (result.rowCount === 0) {
       throw new NotFoundException(`Employee with ID ${id} not found`);
     }
+  }
+
+  async restore(id: string) {
+    const query = `
+    UPDATE employees
+    SET deleted_at = NULL
+    WHERE id = $1
+    RETURNING *
+    `;
+    const result = await pool.query(query, [id]);
+    if (result.rows.length === 0) {
+      throw  new NotFoundException(`Employee with ID ${id} not found`);
+    }
+    return result.rows[0];
   }
 }
