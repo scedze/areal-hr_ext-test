@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   postgres:
@@ -12,6 +12,49 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - hr-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  api:
+    build:
+      context: .
+      dockerfile: containers/api/Dockerfile
+    container_name: areal-hr-api
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: 0000
+      DB_NAME: ext-test
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hr-network
+
+  app:
+    build:
+      context: .
+      dockerfile: containers/app/Dockerfile
+    container_name: areal-hr-app
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - hr-network
+
+networks:
+  hr-network:
+    driver: bridge
 
 volumes:
   postgres_data:
